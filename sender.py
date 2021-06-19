@@ -1,8 +1,10 @@
 import socket, sys
 
 # args
-serverIP = sys.argv[1]  # 10.0.2.15 pc1
-serverPort = sys.argv[2]  # 12345 pc1
+#TODO: check if argv[1] is exsist with try
+Xname = sys.argv[1]  # 10.0.2.15 pc1
+FILE_NAME = "messages"+Xname+".txt"
+
 
 
 while (True):
