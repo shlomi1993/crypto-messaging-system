@@ -175,12 +175,12 @@ def main():
     handleMessagesFile()
 
 
-# main()
+main()
 
-x = "127.0.0.1"
-y = "9000"
-
-x,y = convertIPandPORT(x,y)
-print (x,y)
-x.decode('utf-8')
-print(str(x))
+# x = "127.0.0.1"
+# y = "9000"
+#
+# x,y = convertIPandPORT(x,y)
+# print (x,y)
+# x.decode('utf-8')
+# print(str(x))
