@@ -5,7 +5,6 @@ from datetime import datetime
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 # Parse the given number
@@ -13,14 +12,14 @@ try:
 	number = int(sys.argv[1])
 except:
     exit(-1)
-port = 8999 + number
+port = 5000 # need to change to 8999 + number
 
 # Open server's socket.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('', port))
 s.listen(5)
 conn, addr = s.accept()
-conn.settimeout(2)
+conn.settimeout(1)
 
 # Get private key.
 with open("sk" + str(number) + ".pem", "rb") as skey:
@@ -67,8 +66,9 @@ while True:
     if time_splitted[2] != "00":
         doing = False
     elif doing == False:
+        doing == True
+        delivery = random.choice(deliveries)
         if len(delivery) > 0:
-            delivery = random.choice(deliveries)
             t = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             t.connect((delivery[0], delivery[1]))
             t.send(delivery[2])
