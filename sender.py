@@ -136,7 +136,9 @@ def encryptionByKey(key, message):
 def sendMsg(l, ip, port):
     print(l)
     print(ip)
+    print(type(ip))
     print(port)
+    print(type(port))
     print("".join("\\x{:02}".format(b) for b in port))
 
     # Debug
@@ -145,6 +147,8 @@ def sendMsg(l, ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sendMsg = l
 
+    ip = ip.decode("utf-8")
+    port = port.decode("utf-8")
     addr = (ip, int(port))
     s.sendto(sendMsg.encode('utf-8'), addr)
 
@@ -171,4 +175,12 @@ def main():
     handleMessagesFile()
 
 
-main()
+# main()
+
+x = "127.0.0.1"
+y = "9000"
+
+x,y = convertIPandPORT(x,y)
+print (x,y)
+x.decode('utf-8')
+print(str(x))
