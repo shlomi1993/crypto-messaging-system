@@ -109,13 +109,8 @@ def handlePKFile(n):
 
 
 # Generate symmetric key with the password and salt from the massages file
-def genSymmetricKey(password, salt):
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,
-    )
+def genSymmetricKey(password, new_salt):
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=new_salt, iterations=100000,)
     key = base64.urlsafe_b64encode(kdf.derive(password))
     fKey = Fernet(key)
     return fKey
@@ -170,17 +165,15 @@ def checkRecive(l):
 
 
 # Program Flow
-def main():
-    loadIPsFile()
-    handleMessagesFile()
+# loadIPsFile()
+# handleMessagesFile()
 
 
-main()
+x = "127.0.0.1"
+y = "9000"
 
-# x = "127.0.0.1"
-# y = "9000"
-#
-# x,y = convertIPandPORT(x,y)
-# print (x,y)
+print(x,y)
+x,y = convertIPandPORT(x,y)
+print (x,y)
 # x.decode('utf-8')
 # print(str(x))

@@ -77,10 +77,10 @@ msg = x + y + c
 pk = handlePKFile(str(2))
 l = encryptionByKey(pk, msg)
 
-print("sending l: " + str(l))    
+print("\nencrypt the message \""+ message + "\" and send it to " + TCP_IP + ":" + str(TCP_PORT) + ".\n")
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, int(TCP_PORT)))
+s.connect((TCP_IP, 9001))
 s.send(l)
 s.close()
 
