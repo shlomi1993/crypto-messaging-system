@@ -14,13 +14,14 @@ try:
 	number = int(sys.argv[1])
 	with open("ips.txt", "r") as ips:
 	    ip, port = ips.read().split("\n")[number - 1].split(" ")
+	port = int(port)
 except:
-    print("Invalid given number.")
+    print("Invalid given number or ips.txt file.")
     exit(-1)
 
 # Open server's socket.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', int(port)))
+s.bind(('', port))
 s.settimeout(0.1)
 s.listen(5)
 
@@ -48,6 +49,7 @@ while True:
 
         # DEBUG
         print("message recieved")
+        print("delveries: " + str(len(deliveries)))
 
         # Decryption.
         plaintext = sk.decrypt(data,
