@@ -15,6 +15,7 @@ start_seconds = datetime.now().strftime("%H:%M:%S").split(":")[2]
 number = int(sys.argv[1])
 with open("ips.txt", "r") as ips:
     ip, port = ips.read().split("\n")[number - 1].split(" ")
+    print("server: ", ip, " : ", port)
     
 # Get private key.
 with open("sk" + str(number) + ".pem", "rb") as skey:
@@ -75,7 +76,7 @@ while True:
     if time_splitted[2] != start_seconds:
         doing = False
 
-    # DEBUG
+    # # DEBUG
     # if time_splitted[2] != "00" and time_splitted[2] != "10" and time_splitted[2] != "20" and time_splitted[2] != "30" and time_splitted[2] != "40" and time_splitted[2] != "50":
     #    doing = False
 
