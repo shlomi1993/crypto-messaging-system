@@ -84,6 +84,3 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((TCP_IP, 9001))
 s.send(l)
 s.close()
-
-
-
