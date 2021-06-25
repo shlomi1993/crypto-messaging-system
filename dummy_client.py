@@ -1,4 +1,4 @@
-import socket, sys, base64
+import socket, sys, base64, random
 from cryptography.fernet import Fernet
 import base64
 import os
@@ -66,7 +66,8 @@ BUFFER_SIZE = 1024
 
 x,y = convertIPandPORT(TCP_IP, TCP_PORT)
 
-message = "cccc"
+messages = ["aaaa", "bbbb", "cccc", "dddd"]
+message = random.choice(messages)
 k = genSymmetricKey(password, salt)
 c = k.encrypt(message.encode())
 
@@ -77,12 +78,9 @@ msg = x + y + c
 pk = handlePKFile(str(2))
 l = encryptionByKey(pk, msg)
 
-print("\nencrypt the message \""+ message + "\" and send it to " + TCP_IP + ":" + str(TCP_PORT) + ".\n")
+print("\nencrypt the message \""+ random.choice(messages) + "\" and send it to " + TCP_IP + ":" + str(TCP_PORT) + ".\n")
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((TCP_IP, 9001))
 s.send(l)
 s.close()
-
-
-

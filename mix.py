@@ -9,6 +9,8 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 BUFFER_SIZE = 20480
 
+start_seconds = datetime.now().strftime("%H:%M:%S").split(":")[2]
+
 # Parse the given number
 number = int(sys.argv[1])
 with open("ips.txt", "r") as ips:
@@ -44,7 +46,6 @@ while True:
 
         # DEBUG
         print("message recieved")
-        print("delveries: " + str(len(deliveries)))
 
         # Decryption.
         plaintext = sk.decrypt(data,
@@ -71,7 +72,7 @@ while True:
     time_splitted = datetime.now().strftime("%H:%M:%S").split(":")
 
     # Each rounded minute, pick a random delivery and send it over TCP to the next server\client.
-    if time_splitted[2] != "00":
+    if time_splitted[2] != start_seconds:
         doing = False
 
     # DEBUG
