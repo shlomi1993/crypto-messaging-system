@@ -32,14 +32,18 @@ k = genSymmetricKey(password, salt)
 # Create a socket, bind and listen.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('', port))
+s.settimeout(0.1)
 s.listen(5)
 
 # Receiver's operation loop.
 while True:
-    conn, addr = s.accept()
-    conn.settimeout(1)
-    data = conn.recv(BUFFER_SIZE)
-    if len(data) > 0:
-        plaintext = k.decrypt(data).decode()
-        time = datetime.now().strftime("%H:%M:%S")
-        print(plaintext + " " + time)
+    try:
+        conn, addr = s.accept()
+        conn.settimeout(1)
+        data = conn.recv(BUFFER_SIZE)
+        if len(data) > 0:
+            plaintext = k.decrypt(data).decode()
+            time = datetime.now().strftime("%H:%M:%S")
+            print(plaintext + " " + time)
+    except socket.timeout:
+        continue
