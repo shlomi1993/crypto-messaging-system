@@ -14,20 +14,9 @@ password = sys.argv[1].encode()
 salt = sys.argv[2].encode()
 port = int(sys.argv[3])
 
-# Function that generates a symmetric key.
-def genSymmetricKey(password, salt):
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,
-        backend=default_backend()
-    )
-    key = base64.urlsafe_b64encode(kdf.derive(password))
-    return Fernet(key)
-
 # Generate symmetric key.
-k = genSymmetricKey(password, salt)
+kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000, backend=default_backend())
+k = Fernet(base64.urlsafe_b64encode(kdf.derive(password)))
 
 # Create a socket, bind and listen.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
