@@ -10,24 +10,19 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 BUFFER_SIZE = 20480
 
 # Parse the given number
-try:
-	number = int(sys.argv[1])
-	with open("ips.txt", "r") as ips:
-	    ip, port = ips.read().split("\n")[number - 1].split(" ")
-	port = int(port)
-except:
-    print("Invalid given number or ips.txt file.")
-    exit(-1)
-
-# Open server's socket.
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', port))
-s.settimeout(0.1)
-s.listen(5)
-
+number = int(sys.argv[1])
+with open("ips.txt", "r") as ips:
+    ip, port = ips.read().split("\n")[number - 1].split(" ")
+    
 # Get private key.
 with open("sk" + str(number) + ".pem", "rb") as skey:
 	sk = load_pem_private_key(skey.read(), password = None, backend = default_backend())
+    
+# Open server's socket.
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(('', int(port)))
+s.settimeout(0.1)
+s.listen(5)
 
 # Set array of deliveries -- each delivery is a touple of [IP, Port, Message].
 deliveries = []
