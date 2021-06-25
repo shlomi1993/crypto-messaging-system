@@ -12,11 +12,7 @@ BUFFER_SIZE = 20480
 # Get arguments
 password = sys.argv[1].encode()
 salt = sys.argv[2].encode()
-try:
-	port = int(sys.argv[3])
-except:
-    print("Cannot parse given port.")
-    exit(-1)
+port = int(sys.argv[3])
 
 # Function that generates a symmetric key.
 def genSymmetricKey(password, salt):
