@@ -79,14 +79,28 @@ def handleMessagesFile():
         c = k.encrypt(message)
         # Create a msg from destIP||destPort||c
         msg = dest_ip + dest_port + c
+        print("start encrypt msg", msg)
 
         for mixServer in reversed(pathList):
+            print("start encrypt for server:", mixServer)
             pk = handlePKFile(mixServer)
             l = encryptionByKey(pk, msg)
             mixIP = ips[int(mixServer) - 1]  # -1 because ips list start from index 0
             mixPort = ports[int(mixServer) - 1]  # -1 because portss list start from index 0
+
+            #Debug
+            ip,port = mixIP,mixPort
+            # Parse IP.
+            ip = str(ip[0]) + "." + str(ip[1]) + "." + str(ip[2]) + "." + str(ip[3])
+
+            # Parse port.
+            port = int(hex(port[0])[2:] + hex(port[1])[2:], 16)
+            print("finish encrypt for server:", ip, port)
+
+
             msg = mixIP + mixPort + l
 
+        print("finish encrypt msg")
         sendMsg(l, mixIP, mixPort)
 
     messagesFile.close()
@@ -129,51 +143,48 @@ def encryptionByKey(key, message):
 
 # Send message to server
 def sendMsg(l, ip, port):
-    print(l)
-    print(ip)
-    print(type(ip))
-    print(port)
-    print(type(port))
-    print("".join("\\x{:02}".format(b) for b in port))
 
-    # Debug
-    checkRecive(l)
+    BUFFER_SIZE = 1024
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sendMsg = l
+    # Parse IP.
+    ip = str(ip[0]) + "." + str(ip[1]) + "." + str(ip[2]) + "." + str(ip[3])
 
-    ip = ip.decode("utf-8")
-    port = port.decode("utf-8")
-    addr = (ip, int(port))
-    s.sendto(sendMsg.encode('utf-8'), addr)
+    # Parse port.
+    port = int(hex(port[0])[2:] + hex(port[1])[2:], 16)
 
-    data, addr = s.recvfrom(1024)
-    reciveMsg = data.decode("utf-8")
-    if (reciveMsg != 'ERROR!'):
-        currentline = reciveMsg.split(",")
-        print(currentline[1])
-    else:
-        print(reciveMsg)
-
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    msg = l
+    adrr = ip, int(port)
+    print("send msg to: ",adrr)
+    # s.connect(("127.0.0.1", 9001))
+    s.connect(adrr)
+    s.send(msg)
+    # data = s.recv(BUFFER_SIZE)
     s.close()
-    return
 
-# Debug
-def checkRecive(l):
+    print("msg sent")
 
     return
 
 
 # Program Flow
-# loadIPsFile()
-# handleMessagesFile()
+
+loadIPsFile()
+handleMessagesFile()
 
 
-x = "127.0.0.1"
-y = "9000"
-
-print(x,y)
-x,y = convertIPandPORT(x,y)
-print (x,y)
-# x.decode('utf-8')
-# print(str(x))
+# ip = "127.0.0.1"
+# port = "9000"
+#
+# print(ip,port)
+# ip,port = convertIPandPORT(ip,port)
+# print (ip,port)
+#
+# # Parse IP.
+# ip = str(ip[0]) + "." + str(ip[1]) + "." + str(ip[2]) + "." + str(ip[3])
+#
+# # Parse port.
+# port = int(hex(port[0])[2:] + hex(port[1])[2:], 16)
+#
+# # x.decode('utf-8')
+# print(ip,port)
