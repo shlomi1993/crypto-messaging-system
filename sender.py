@@ -62,7 +62,7 @@ def handleMessagesFile():
         # save msg details in list
         print(line)
         try:
-            message, path, round, password, salt, dest_ip, dest_port = line.split(' ')
+            message, path, round, password, salt, dest_ip, dest_port = line.rsplit(' ', 6)
 
             # Convert variables
             password = bytes(password, 'utf-8')
@@ -158,8 +158,6 @@ def encryptionByKey(key, message):
 
 # Send message to server
 def sendMsg(l, ip, port):
-
-    BUFFER_SIZE = 1024
 
     # Parse IP.
     ip = str(ip[0]) + "." + str(ip[1]) + "." + str(ip[2]) + "." + str(ip[3])
