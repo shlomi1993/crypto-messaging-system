@@ -1,19 +1,20 @@
 # Shlomi Ben-Shushan, 311408264, Ofir Ben-Ezra, 206073488
 
-import socket, sys, random, threading
+import socket, sys, random
 from datetime import datetime
+from threading import Thread, Lock
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
-BUFFER_SIZE = 20480
-
 # Set activation time.
 interval = datetime.now().strftime("%H:%M:%S").split(":")[2]
 
-# Get IP address and port number.
+# Parse the given number.
 number = int(sys.argv[1])
+
+# Get IP address and port number.
 with open("ips.txt", "r") as ips:
     ip, port = ips.read().split("\n")[number - 1].split(" ")
     
@@ -21,14 +22,30 @@ with open("ips.txt", "r") as ips:
 with open("sk" + str(number) + ".pem", "rb") as skey:
 	sk = load_pem_private_key(skey.read(), password = None, backend = default_backend())
     
-# Set array of deliveries -- each delivery is a touple of [IP, Port, Message].
-deliveries = []
-
 # Open server's socket.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('', int(port)))
 s.settimeout(0.1)
-s.listen(5)
+s.listen(5)    
+
+# Set array of deliveries -- each delivery is a touple of [IP, Port, Message].
+deliveries = []
+mutex = Lock()
+
+# This function add a new delivery while holding other threads from using the deliveries array.
+def addDelivery(touple):
+    mutex.acquire()
+    deliveries.append(touple)
+    mutex.release()
+
+# This function pops a random delivery while holding other threads from using the deliveries array.
+def popDelivery():
+    delivery = None
+    mutex.acquire()
+    delivery = random.choice(deliveries)
+    deliveries.remove(delivery)
+    mutex.release()
+    return delivery
 
 # This function opens a socket, send a message and close the socket.
 def send(delivery):
@@ -43,19 +60,17 @@ def send(delivery):
 def sendingThread():
     doing = False
     while True:    
-        time_splitted = datetime.now().strftime("%H:%M:%S").split(":")
-        if time_splitted[2] != interval:
+        current = datetime.now().strftime("%H:%M:%S").split(":")[2]
+        if current != interval:
             doing = False
         elif doing == False:
             doing = True
             while len(deliveries) > 0:
-                delivery = random.choice(deliveries)
-                deliveries.remove(delivery)
-                threading.Thread(target=send, args=(delivery,)).start()
-
-# This is a client handler function that called for each client in a different thread.
+                Thread(target=send, args=(popDelivery(),)).start()
+                
+# This is a client handler function that is called for each client in a different thread.
 def handleClient(conn):
-    data = conn.recv(BUFFER_SIZE)
+    data = conn.recv(20480)
     if len(data) > 0:            
         plaintext = sk.decrypt(data,
                 padding.OAEP(mgf = padding.MGF1(algorithm = hashes.SHA256()),
@@ -67,17 +82,17 @@ def handleClient(conn):
         port = plaintext[4:6]
         port = int(hex(port[0])[2:] + hex(port[1])[2:], 16)
         msg = plaintext[6:]
-        deliveries.append([ip, port, msg])
-
+        addDelivery([ip, port, msg])
+        
 # This functions accepts new clients in a loop.
-def mainThread():
+def clientsThread():
     while True:
         try:
             conn, addr = s.accept()
-            threading.Thread(target=handleClient, args=(conn,)).start()
+            Thread(target=handleClient, args=(conn,)).start()
         except socket.timeout:
             continue
     
 # Activate server's threads.
-threading.Thread(target=sendingThread, args=()).start()
-threading.Thread(target=mainThread, args=()).start()
+Thread(target=sendingThread, args=()).start()
+Thread(target=clientsThread, args=()).start()
