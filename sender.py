@@ -3,7 +3,14 @@ import socket, sys
 import base64
 import os
 from datetime import datetime
-
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -62,7 +69,7 @@ def handleMessagesFile():
         # save msg details in list
         print(line)
         try:
-            message, path, round, password, salt, dest_ip, dest_port = line.split(' ')
+            message, path, round, password, salt, dest_ip, dest_port = line.rsplit(' ', 6)
 
             # Convert variables
             password = bytes(password, 'utf-8')
@@ -129,7 +136,7 @@ def handlePKFile(n):
         pkFileName = 'pk' + n + '.pem'
         pkFile = open(pkFileName, 'rb')
         publicKeyText = pkFile.read()
-        pk = serialization.load_pem_public_key(publicKeyText, None)
+        pk = load_pem_public_key(publicKeyText, backend = default_backend())
         pkFile.close()
     except IOError:
         print("PK" + n + " File Not Found or path incorrect")
@@ -139,7 +146,7 @@ def handlePKFile(n):
 
 # Generate symmetric key with the password and salt from the massages file
 def genSymmetricKey(password, new_salt):
-    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=new_salt, iterations=100000,)
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=new_salt, iterations=100000, backend=default_backend())
     key = base64.urlsafe_b64encode(kdf.derive(password))
     fKey = Fernet(key)
     return fKey
