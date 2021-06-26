@@ -1,13 +1,12 @@
 # Shlomi Ben-Shushan, 311408264, Ofir Ben-Ezra, 206073488
 
-import socket, sys, base64, threading
+import socket, sys, base64
+from threading import Thread
 from cryptography.fernet import Fernet
 from datetime import datetime
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
-
-BUFFER_SIZE = 20480
 
 # Get arguments
 password = sys.argv[1].encode()
@@ -26,17 +25,16 @@ s.listen(5)
 
 # This is a client handler function that called for each client in a different thread.
 def handleClient(conn):
-    data = conn.recv(BUFFER_SIZE)
+    data = conn.recv(20480)
     if len(data) > 0:
         plaintext = k.decrypt(data).decode()
         time = datetime.now().strftime("%H:%M:%S")
         print(plaintext + " " + time)
     
-
 # Receiver's operation loop.
 while True:
     try:
         conn, addr = s.accept()
-        threading.Thread(target=handleClient, args=(conn,)).start()
+        Thread(target=handleClient, args=(conn,)).start()
     except socket.timeout:
         continue
