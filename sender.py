@@ -1,15 +1,8 @@
 # Shlomi Ben-Shushan, 311408264, Ofir Ben-Ezra, 206073488
 import socket, sys
 import base64
-import os
 from datetime import datetime
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
@@ -33,7 +26,6 @@ def loadIPsFile():
 
         # start send message flow line by line
     for line in ipFile:
-        print(line)
         try:
             ip, port = line.split(' ')
             ip, port = convertIPandPORT(ip, port)
@@ -61,13 +53,12 @@ def handleMessagesFile():
     try:
         messagesFile = open(MESSAGES_FILE_NAME, "r")
     except IOError:
-        print("Messages File Not Found or path incorrect")
+        # print("Messages File Not Found or path incorrect")
         exit(1)
 
     # start send message flow line by line
     for line in messagesFile:
         # save msg details in list
-        print(line)
         try:
             message, path, round, password, salt, dest_ip, dest_port = line.rsplit(' ', 6)
 
@@ -82,7 +73,7 @@ def handleMessagesFile():
             msgList.append((round, msgDetails))
 
         except ValueError:
-            print("ARGS Problem - exit")
+            # print("ARGS Problem - exit")
             messagesFile.close()
             exit(1)
     messagesFile.close()
@@ -105,24 +96,11 @@ def handelOneMessage(msgDetails):
 
     for mixServer in reversed(pathList):
 
-        # print("start encrypt for server:", mixServer)
-
         pk = handlePKFile(mixServer)
         l = encryptionByKey(pk, msg)
         mixIP = ips[int(mixServer) - 1]  # -1 because ips list start from index 0
         mixPort = ports[int(mixServer) - 1]  # -1 because portss list start from index 0
-        #Debug
-        ip,port = mixIP,mixPort
-
-        # # Parse IP.
-        # ip = str(ip[0]) + "." + str(ip[1]) + "." + str(ip[2]) + "." + str(ip[3])
-        # # Parse port.
-        # port = int(hex(port[0])[2:] + hex(port[1])[2:], 16)
-        # print("finish encrypt for server:", ip, port)
-
         msg = mixIP + mixPort + l
-
-    print("finish encrypt msg")
 
     sendMsg(l, mixIP, mixPort)
 
@@ -139,7 +117,7 @@ def handlePKFile(n):
         pk = load_pem_public_key(publicKeyText, backend = default_backend())
         pkFile.close()
     except IOError:
-        print("PK" + n + " File Not Found or path incorrect")
+        # print("PK" + n + " File Not Found or path incorrect")
         exit(1)
     return pk
 
@@ -178,9 +156,6 @@ def sendMsg(l, ip, port):
     s.connect(adrr)
     s.send(msg)
     s.close()
-
-    print("send msg to: ", adrr)
-
     return
 
 
@@ -191,8 +166,9 @@ currentRound = 0
 doing = False
 loadIPsFile()
 msgListSortedByRounds = handleMessagesFile()
+maxRound = msgListSortedByRounds[-1][0]
 
-while currentRound != 5:
+while currentRound <= maxRound:
     time_splitted = datetime.now().strftime("%H:%M:%S").split(":")
 
     if time_splitted[2] != start_seconds:
@@ -200,24 +176,7 @@ while currentRound != 5:
 
     elif doing == False:
         doing = True
-        print("current round: ", currentRound)
         for msg in msgListSortedByRounds:
             if (msg[0] == currentRound):
                 handelOneMessage(msg[1])
         currentRound += 1
-
-# ip = "127.0.0.1"
-# port = "9000"
-#
-# print(ip,port)
-# ip,port = convertIPandPORT(ip,port)
-# print (ip,port)
-#
-# # Parse IP.
-# ip = str(ip[0]) + "." + str(ip[1]) + "." + str(ip[2]) + "." + str(ip[3])
-#
-# # Parse port.
-# port = int(hex(port[0])[2:] + hex(port[1])[2:], 16)
-#
-# # x.decode('utf-8')
-# print(ip,port)
