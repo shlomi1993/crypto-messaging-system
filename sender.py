@@ -1,6 +1,7 @@
 # Shlomi Ben-Shushan, 311408264, Ofir Ben-Ezra, 206073488
 import socket, sys
 import base64
+import time
 from datetime import datetime
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
@@ -164,6 +165,7 @@ def sendMsg(l, ip, port):
 start_seconds = datetime.now().strftime("%H:%M:%S").split(":")[2]
 currentRound = 0
 doing = False
+firstTime = 1
 loadIPsFile()
 msgListSortedByRounds = handleMessagesFile()
 maxRound = msgListSortedByRounds[-1][0]
@@ -177,6 +179,10 @@ while currentRound <= maxRound:
     elif doing == False:
         doing = True
         for msg in msgListSortedByRounds:
+            # if it is the first msg at the first round, wait 1 sec until the servers is up for sure
+            if (msg[0] == 0 and (firstTime == 1)):
+                firstTime = 0
+                time.sleep(1)
             if (msg[0] == currentRound):
                 handelOneMessage(msg[1])
         currentRound += 1
