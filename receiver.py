@@ -25,6 +25,7 @@ s.listen(5)
 
 # This is a client handler function that called for each client in a different thread.
 def handleClient(conn):
+    conn.settimeout(20)
     data = conn.recv(20480)
     if len(data) > 0:
         plaintext = k.decrypt(data).decode()
