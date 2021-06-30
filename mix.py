@@ -8,6 +8,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
+# Set buffer.
+BUFFER = 8192
+
 # This class defines a Data-Structure that holds deliveries and use them among threads.
 class Outbox:
     
@@ -76,10 +79,23 @@ def sendingThread():
             doing = True
             while len(outbox.deliveries) > 0:
                 Thread(target=send, args=(outbox.popDelivery(),)).start()
-                
+
+# This function reads received data in chunks and return the whole data.
+def read(conn):    
+    data = conn.recv(BUFFER)
+    if data:
+        while True:
+            packet = conn.recv(BUFFER)
+            if packet:
+                data += packet
+            else:
+                break
+    return data
+         
 # This is a client handler function that is called for each client in a different thread.
 def handleClient(conn):
-    data = conn.recv(20480)
+    conn.settimeout(20)
+    data = read(conn)
     if len(data) > 0:            
         plaintext = sk.decrypt(data,
                 padding.OAEP(mgf = padding.MGF1(algorithm = hashes.SHA256()),
