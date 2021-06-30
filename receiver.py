@@ -43,7 +43,7 @@ def read(conn):
     
 # This is a client handler function that called for each client in a different thread.
 def handleClient(conn):
-    conn.settimeout(20)
+    conn.settimeout(5)
     data = read(conn)
     if len(data) > 0:
         plaintext = k.decrypt(data).decode()

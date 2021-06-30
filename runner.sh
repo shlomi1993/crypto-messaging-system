@@ -8,5 +8,5 @@ cmd.exe /c start cmd.exe /c wsl.exe python3 mix.py 3
 sleep 1
 
 cmd.exe /c start cmd.exe /c wsl.exe python3 sender.py 1
-# cmd.exe /c start cmd.exe /c wsl.exe python3 sender.py 2
-# cmd.exe /c start cmd.exe /c wsl.exe python3 sender.py 3
+cmd.exe /c start cmd.exe /c wsl.exe python3 sender.py 2
+cmd.exe /c start cmd.exe /c wsl.exe python3 sender.py 3

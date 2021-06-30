@@ -25,14 +25,19 @@ class Outbox:
         self.deliveries.append(touple)
         self.mutex.release()
 
-    # This function pops a random delivery while holding other threads from using the deliveries array.
-    def popDelivery(self):
-        delivery = None
+    # This function sends all deliveries in a random order while holding other threads from using the deliveries array.
+    def sendAllMessages(self):
         self.mutex.acquire()
-        delivery = random.choice(self.deliveries)
-        self.deliveries.remove(delivery)
+        while len(self.deliveries) > 0:
+            delivery = random.choice(self.deliveries)
+            self.deliveries.remove(delivery)
+            t = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                t.connect((delivery[0], delivery[1]))
+                t.send(delivery[2])
+            finally:
+                t.close()
         self.mutex.release()
-        return delivery
 
 # Set activation time.
 interval = datetime.now().strftime("%H:%M:%S").split(":")[2]
@@ -57,28 +62,16 @@ s.bind(('', int(port)))
 s.settimeout(0.1)
 s.listen(5)    
 
-# This function opens a socket, send a message and close the socket.
-def send(delivery):
-    if delivery is None:
-        return
-    t = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        t.connect((delivery[0], delivery[1]))
-        t.send(delivery[2])
-    finally:
-        t.close()
-
 # This function send all the deliveries each time interval. Each delivery is sent in a different thread.
 def sendingThread():
-    doing = False
+    sending = False
     while True:    
         current = datetime.now().strftime("%H:%M:%S").split(":")[2]
         if current != interval:
-            doing = False
-        elif doing == False:
-            doing = True
-            while len(outbox.deliveries) > 0:
-                Thread(target=send, args=(outbox.popDelivery(),)).start()
+            sending = False
+        elif sending == False:
+            sending = True
+            outbox.sendAllMessages()
 
 # This function reads received data in chunks and return the whole data.
 def read(conn):    
@@ -94,7 +87,7 @@ def read(conn):
          
 # This is a client handler function that is called for each client in a different thread.
 def handleClient(conn):
-    conn.settimeout(20)
+    conn.settimeout(5)
     data = read(conn)
     if len(data) > 0:            
         plaintext = sk.decrypt(data,
