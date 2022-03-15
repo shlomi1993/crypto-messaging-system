@@ -1,4 +1,4 @@
-# Shlomi Ben-Shushan, [REDACTED_ID], Ofir Ben-Ezra, 206073488
+# Shlomi Ben-Shushan & Ofir Ben-Ezra
 
 import socket, sys, base64
 from threading import Thread, Lock
